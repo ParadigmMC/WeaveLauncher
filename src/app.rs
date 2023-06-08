@@ -1,16 +1,14 @@
 /// We derive Deserialize/Serialize so we can persist app state on shutdown.
 #[derive(serde::Deserialize, serde::Serialize)]
 #[serde(default)] // if we add new fields, give them default values when deserializing old state
-pub struct TemplateApp {
-    // Example stuff:
+pub struct WeaveLauncher {
     label: String,
 
-    // this how you opt-out of serialization of a member
     #[serde(skip)]
     value: f32,
 }
 
-impl Default for TemplateApp {
+impl Default for WeaveLauncher {
     fn default() -> Self {
         Self {
             // Example stuff:
@@ -20,7 +18,7 @@ impl Default for TemplateApp {
     }
 }
 
-impl TemplateApp {
+impl WeaveLauncher {
     /// Called once before the first frame.
     pub fn new(cc: &eframe::CreationContext<'_>) -> Self {
         // This is also where you can customize the look and feel of egui using
@@ -36,8 +34,8 @@ impl TemplateApp {
     }
 }
 
-impl eframe::App for TemplateApp {
-    /// Called by the frame work to save state before shutdown.
+impl eframe::App for WeaveLauncher {
+    /// save state before shutdown
     fn save(&mut self, storage: &mut dyn eframe::Storage) {
         eframe::set_value(storage, eframe::APP_KEY, self);
     }
@@ -52,7 +50,6 @@ impl eframe::App for TemplateApp {
         // Tip: a good default choice is to just keep the `CentralPanel`.
         // For inspiration and more examples, go to https://emilk.github.io/egui
 
-        #[cfg(not(target_arch = "wasm32"))] // no File->Quit on web pages!
         egui::TopBottomPanel::top("top_panel").show(ctx, |ui| {
             // The top panel is often a good place for a menu bar:
             egui::menu::bar(ui, |ui| {
@@ -64,7 +61,7 @@ impl eframe::App for TemplateApp {
             });
         });
 
-        egui::SidePanel::left("side_panel").show(ctx, |ui| {
+        egui::SidePanel::right("side_panel").show(ctx, |ui| {
             ui.heading("Side Panel");
 
             ui.horizontal(|ui| {
@@ -103,14 +100,5 @@ impl eframe::App for TemplateApp {
             ));
             egui::warn_if_debug_build(ui);
         });
-
-        if false {
-            egui::Window::new("Window").show(ctx, |ui| {
-                ui.label("Windows can be moved by dragging them.");
-                ui.label("They are automatically sized based on contents.");
-                ui.label("You can turn on resizing and scrolling if you like.");
-                ui.label("You would normally choose either panels OR windows.");
-            });
-        }
     }
 }
