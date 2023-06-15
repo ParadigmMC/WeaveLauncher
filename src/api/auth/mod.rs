@@ -3,7 +3,7 @@ use serde::{Serialize, Deserialize};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(tag = "type")]
-pub enum MCAccount {
+pub enum MCUser {
     Offline {
         name: String,
         uuid: String,

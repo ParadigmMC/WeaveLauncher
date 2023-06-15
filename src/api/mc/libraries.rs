@@ -7,7 +7,7 @@ use tokio::fs::File;
 use crate::api::WEAVE;
 
 pub struct LibraryManager {
-    path: PathBuf,
+    pub path: PathBuf,
 }
 
 impl LibraryManager {

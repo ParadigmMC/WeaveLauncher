@@ -7,16 +7,19 @@ use tokio::{fs::File, io::BufWriter};
 use lazy_static::lazy_static;
 
 use self::{instances::{Instance, load_instances}, mc::{assets::AssetManager, libraries::LibraryManager, versions::VersionManager, clientjar::ClientJarManager}};
+use self::java::JavaManager;
 
 pub mod auth;
 pub mod instances;
 mod mc;
+mod java;
 
 lazy_static! {
     pub static ref WEAVE: WeaveAPI = WeaveAPI::init().expect("Couldn't init launcher");
 }
 
 pub const APP_NAME: &str = "WeaveLauncher";
+pub const APP_VERSION: &str = env!("CARGO_PKG_VERSION");
 pub const APP_USER_AGENT: &str = concat!(
     "ParadigmMC/WeaveLauncher/",
     env!("CARGO_PKG_VERSION"),
@@ -32,6 +35,7 @@ pub struct WeaveAPI {
     pub libraries: LibraryManager,
     pub versions: VersionManager,
     pub clientjars: ClientJarManager,
+    pub java: JavaManager,
 }
 
 impl WeaveAPI {
@@ -52,6 +56,7 @@ impl WeaveAPI {
             libraries: LibraryManager::new(folder_root.join("libraries")),
             versions: VersionManager::new(folder_root.join("versions")),
             clientjars: ClientJarManager::new(folder_root.join("jars")),
+            java: JavaManager::init(),
             folder_root,
         })
     }

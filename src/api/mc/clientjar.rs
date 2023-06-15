@@ -1,7 +1,7 @@
 use std::{path::PathBuf, fs};
 
 use anyhow::{Result, Context};
-use mcapi::vanilla::{VersionInfo, PistonRuleMatcher};
+use mcapi::vanilla::VersionInfo;
 use tokio::fs::File;
 
 use crate::api::WEAVE;

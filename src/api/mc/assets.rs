@@ -7,7 +7,7 @@ use tokio::fs::File;
 use crate::api::WEAVE;
 
 pub struct AssetManager {
-    path: PathBuf,
+    pub path: PathBuf,
 }
 
 const INDEXES: &str = "indexes";
@@ -23,7 +23,11 @@ impl AssetManager {
     }
 
     pub fn index_exists(&self, version: &str) -> bool {
-        self.path.join(INDEXES).join(version.to_owned() + ".json").exists()
+        self.get_index_path(version).exists()
+    }
+
+    pub fn get_index_path(&self, version: &str) -> PathBuf {
+        self.path.join(INDEXES).join(version.to_owned() + ".json")
     }
 
     pub async fn download(&self, index: &MCAssetIndex) -> Result<()> {

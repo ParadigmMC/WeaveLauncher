@@ -1,3 +1,5 @@
+use crate::api::WEAVE;
+
 /// We derive Deserialize/Serialize so we can persist app state on shutdown.
 #[derive(serde::Deserialize, serde::Serialize)]
 #[serde(default)] // if we add new fields, give them default values when deserializing old state
@@ -92,6 +94,10 @@ impl eframe::App for WeaveLauncher {
 
         egui::CentralPanel::default().show(ctx, |ui| {
             ui.heading("instances here");
+
+            if ui.button("TEST MC 1.20.1").clicked() {
+                
+            }
         });
     }
 }

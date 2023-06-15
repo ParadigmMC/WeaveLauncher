@@ -2,7 +2,7 @@ use std::{path::PathBuf, fs};
 
 use anyhow::{Result, Context};
 use mcapi::vanilla::{VersionInfo, PistonRuleMatcher};
-use tokio::fs::File;
+use tokio::{fs::File, io::AsyncWriteExt};
 
 use crate::api::WEAVE;
 
@@ -24,7 +24,7 @@ impl VersionManager {
             Ok(self.read_info(version).await?)
         } else {
             let ver = self.fetch_info(version).await?;
-            self.save_info(&ver);
+            self.save_info(&ver).await?;
             Ok(ver)
         }
     }
@@ -46,8 +46,8 @@ impl VersionManager {
 
     pub async fn save_info(&self, ver: &VersionInfo) -> Result<()> {
         let str = serde_json::to_string_pretty(ver)?;
-        let mut f = File::create(self.info_path(&ver.id))?;
-        f.write_all(str.as_bytes())?;
+        let mut f = File::create(self.info_path(&ver.id)).await?;
+        f.write_all(str.as_bytes()).await?;
 
         Ok(())
     }
