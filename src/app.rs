@@ -45,19 +45,20 @@ impl eframe::App for WeaveLauncher {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         let Self { label, value } = self;
 
-        // Examples of how to create different panels and windows.
-        // Pick whichever suits you.
-        // Tip: a good default choice is to just keep the `CentralPanel`.
-        // For inspiration and more examples, go to https://emilk.github.io/egui
-
         egui::TopBottomPanel::top("top_panel").show(ctx, |ui| {
             // The top panel is often a good place for a menu bar:
-            egui::menu::bar(ui, |ui| {
-                ui.menu_button("File", |ui| {
-                    if ui.button("Quit").clicked() {
-                        _frame.close();
-                    }
-                });
+            ui.horizontal(|ui| {
+                if ui.button("Create new instance").clicked() {
+                    dbg!("Creating new instance...");
+                }
+
+                if ui.button("Folders").clicked() {
+                    dbg!("Todo...");
+                }
+
+                if ui.button("Settings").clicked() {
+                    dbg!("Opening settings");
+                }
             });
         });
 
@@ -90,15 +91,7 @@ impl eframe::App for WeaveLauncher {
         });
 
         egui::CentralPanel::default().show(ctx, |ui| {
-            // The central panel the region left after adding TopPanel's and SidePanel's
-
-            ui.heading("eframe template");
-            ui.hyperlink("https://github.com/emilk/eframe_template");
-            ui.add(egui::github_link_file!(
-                "https://github.com/emilk/eframe_template/blob/master/",
-                "Source code."
-            ));
-            egui::warn_if_debug_build(ui);
+            ui.heading("instances here");
         });
     }
 }
