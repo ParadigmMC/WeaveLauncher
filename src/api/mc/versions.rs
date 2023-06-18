@@ -39,8 +39,9 @@ impl VersionManager {
     }
 
     pub async fn fetch_info(&self, version: &str) -> Result<VersionInfo> {
-        let list = mcapi::vanilla::fetch_version_manifest(&WEAVE.http_client).await?;
-        let ver = list.fetch(version, &WEAVE.http_client).await?;
+        let weave = WEAVE.read().await;
+        let list = mcapi::vanilla::fetch_version_manifest(&weave.http_client).await?;
+        let ver = list.fetch(version, &weave.http_client).await?;
         Ok(ver)
     }
 
@@ -63,12 +64,13 @@ impl VersionManager {
     }
 
     pub async fn download_all(&self, ver: &VersionInfo) -> Result<()> {
+        let weave = WEAVE.read().await;
         let matcher = PistonRuleMatcher::new()?;
 
         // TODO: Tasks, reporting, subtasks, logging etc
-        WEAVE.clientjars.download_jar(&ver).await?;
-        WEAVE.assets.download(&ver.fetch_asset_index(&WEAVE.http_client).await?).await?;
-        WEAVE.libraries.download_all(&matcher, &ver).await?;
+        weave.clientjars.download_jar(&ver).await?;
+        weave.assets.download(&ver.fetch_asset_index(&weave.http_client).await?).await?;
+        weave.libraries.download_all(&matcher, &ver).await?;
 
         Ok(())
     }

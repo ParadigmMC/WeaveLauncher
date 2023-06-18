@@ -35,13 +35,14 @@ impl LibraryManager {
         lib: &PistonLibrary
     ) -> Result<()> {
         if matcher.should_download_library(lib) {
-            let res = lib.download_artifact(&WEAVE.http_client).await?;
-            WEAVE.handle_download(res, self.create_file_artifact(lib).await?)
+            let weave = WEAVE.read().await;
+            let res = lib.download_artifact(&weave.http_client).await?;
+            weave.handle_download(res, self.create_file_artifact(lib).await?)
                 .await.context("Downloading library")?;
 
             if let Some(native) = &matcher.get_native_library(lib) {
-                let res = native.download(&WEAVE.http_client).await?;
-                WEAVE.handle_download(res, self.create_file_native(native).await?)
+                let res = native.download(&weave.http_client).await?;
+                weave.handle_download(res, self.create_file_native(native).await?)
                     .await.context("Downloading library")?;
             }
         }

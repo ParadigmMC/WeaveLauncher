@@ -22,16 +22,16 @@ impl ClientJarManager {
     }
 
     pub async fn download_jar_from_version(&self, version: &str) -> Result<()> {
-        let list = mcapi::vanilla::fetch_version_manifest(&WEAVE.http_client).await?;
+        let list = mcapi::vanilla::fetch_version_manifest(&WEAVE.read().await.http_client).await?;
 
-        let ver = list.fetch(version, &WEAVE.http_client).await?;
+        let ver = list.fetch(version, &WEAVE.read().await.http_client).await?;
 
         self.download_jar(&ver).await
     }
 
     pub async fn download_jar(&self, ver: &VersionInfo) -> Result<()> {
-        let res = ver.downloads.client.download(&WEAVE.http_client).await?;
-        WEAVE.handle_download(res, self.to_file(&ver.id).await?).await?;
+        let res = ver.downloads.client.download(&WEAVE.read().await.http_client).await?;
+        WEAVE.read().await.handle_download(res, self.to_file(&ver.id).await?).await?;
         Ok(())
     }
 

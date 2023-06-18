@@ -31,14 +31,16 @@ impl AssetManager {
     }
 
     pub async fn download(&self, index: &MCAssetIndex) -> Result<()> {
+        let weave = WEAVE.read().await;
+
         if index.map_to_resources {
             todo!();
             //return Ok(())
         }
 
         for (filename, asset) in index.objects.iter() {
-            let res = asset.download(&WEAVE.http_client).await?;
-            WEAVE.handle_download(res, self.to_file(asset).await?)
+            let res = asset.download(&weave.http_client).await?;
+            weave.handle_download(res, self.to_file(asset).await?)
                 .await.context(format!("Downloading asset: {filename}"))?;
         }
 

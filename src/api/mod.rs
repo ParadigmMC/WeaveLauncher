@@ -1,21 +1,25 @@
 
-use std::path::PathBuf;
+use std::{path::PathBuf, sync::Arc};
 
 use anyhow::{Result, Context};
 use futures::StreamExt;
-use tokio::{fs::File, io::BufWriter};
+use tokio::{fs::File, io::BufWriter, sync::RwLock};
 use lazy_static::lazy_static;
 
-use self::{instances::{Instance, load_instances}, mc::{assets::AssetManager, libraries::LibraryManager, versions::VersionManager, clientjar::ClientJarManager}};
+use self::{instances::InstanceManager, mc::{assets::AssetManager, libraries::LibraryManager, versions::VersionManager, clientjar::ClientJarManager}};
 use self::java::JavaManager;
 
 pub mod auth;
 pub mod instances;
+//pub mod tasks;
 mod mc;
+pub use mc::launch;
 mod java;
 
 lazy_static! {
-    pub static ref WEAVE: WeaveAPI = WeaveAPI::init().expect("Couldn't init launcher");
+    pub static ref WEAVE: Arc<RwLock<WeaveAPI>> = {
+        Arc::new(RwLock::new(WeaveAPI::init().expect("Couldn't init launcher")))
+    };
 }
 
 pub const APP_NAME: &str = "WeaveLauncher";
@@ -29,20 +33,21 @@ pub const APP_USER_AGENT: &str = concat!(
 
 pub struct WeaveAPI {
     pub folder_root: PathBuf,
-    pub instances: Vec<Instance>,
     pub http_client: reqwest::Client,
-    pub assets: AssetManager,
-    pub libraries: LibraryManager,
+
+    pub instances: InstanceManager,
+
     pub versions: VersionManager,
     pub clientjars: ClientJarManager,
+    pub libraries: LibraryManager,
+    pub assets: AssetManager,
+
     pub java: JavaManager,
 }
 
 impl WeaveAPI {
     pub fn init() -> Result<Self> {
         let folder_root = dirs::config_dir().expect("Couldn't get config dir").join(APP_NAME);
-
-        let instances = load_instances(folder_root.join("instances")).context("Loading instances")?;
 
         let http_client = reqwest::Client::builder()
             .user_agent(APP_USER_AGENT)
@@ -51,11 +56,11 @@ impl WeaveAPI {
 
         Ok(WeaveAPI {
             http_client,
-            instances,
-            assets: AssetManager::new(folder_root.join("assets")),
-            libraries: LibraryManager::new(folder_root.join("libraries")),
-            versions: VersionManager::new(folder_root.join("versions")),
-            clientjars: ClientJarManager::new(folder_root.join("jars")),
+            instances: InstanceManager::new(folder_root.join("instances")),
+            assets: AssetManager::new(folder_root.join("mc").join("assets")),
+            libraries: LibraryManager::new(folder_root.join("mc").join("libraries")),
+            versions: VersionManager::new(folder_root.join("mc").join("versions")),
+            clientjars: ClientJarManager::new(folder_root.join("mc").join("jars")),
             java: JavaManager::init(),
             folder_root,
         })
@@ -77,10 +82,4 @@ impl WeaveAPI {
         }
         Ok(())
     }
-}
-
-trait TaskReporter {
-    fn begin(&self, name: &str);
-    fn progress(&self, perc: u8, all: u8);
-    fn end(&self);
 }

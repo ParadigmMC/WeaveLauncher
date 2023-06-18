@@ -1,19 +1,22 @@
-#![warn(clippy::all, rust_2018_idioms)]
-#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")] // hide console window on Windows in release
+// hide console window on Windows in release
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use app::WeaveLauncher;
+use anyhow::Result;
+use tokio::runtime::Runtime;
 
-pub mod app;
 pub mod api;
+pub mod util;
+pub mod ui;
 
-fn main() -> eframe::Result<()> {
-    // Log to stdout (if you run with `RUST_LOG=debug`).
-    tracing_subscriber::fmt::init();
+fn main() -> Result<()> {
+    env_logger::init();
 
-    let native_options = eframe::NativeOptions::default();
-    eframe::run_native(
-        "Weave Launcher",
-        native_options,
-        Box::new(|cc| Box::new(WeaveLauncher::new(cc))),
-    )
+    let rt = Runtime::new().expect("Unable to create Runtime");
+
+    // Enter the runtime so that `tokio::spawn` is available immediately.
+    let _enter = rt.enter();
+
+    ui::run_eframe()?;
+
+    Ok(())
 }
